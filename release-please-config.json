@@ -3,7 +3,7 @@
   "separate-pull-requests": true,
   "packages": {
     ".": {
-      "release-type": "helm",
+      "release-type": "go",
       "changelog-path": "CHANGELOG.md"
     }
   },
