@@ -1,0 +1,18 @@
+on:
+  workflow_call:
+
+jobs:
+  release-helm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Lint helm chart
+        run: |
+          helm lint .

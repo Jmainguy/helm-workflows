@@ -1,0 +1,69 @@
+on:
+  workflow_call:
+    secrets:
+      helm_username:
+        required: true
+      helm_password:
+        required: true
+    inputs:
+      chart_name:
+        type: string
+        required: true   # Chart name is required for Helm packaging and push
+      helm_registry:
+        type: string
+        required: true   # The Helm registry (e.g., an OCI registry or ChartMuseum URL)
+      chart_path:
+        type: string
+        required: true   # Path to the Helm chart directory (e.g., ./charts/mychart)
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release-please.outputs.release_created }}
+      major: ${{ steps.release-please.outputs.major }}
+      minor: ${{ steps.release-please.outputs.minor }}
+      patch: ${{ steps.release-please.outputs.patch }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release-please
+
+  release-helm:
+    needs: release-please
+    if: needs.release-please.outputs.release_created
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: set helm chart version
+        run: |
+          echo "CHART_VERSION=${chart_version}" >> $GITHUB_ENV
+        env:
+          chart_version: ${{ needs.release-please.outputs.major }}.${{ needs.release-please.outputs.minor }}.${{ needs.release-please.outputs.patch }}
+
+      - name: Login to Helm registry (if required)
+        run: |
+          helm registry login ${{ inputs.helm_registry }} \
+            --username ${{ secrets.helm_username }} \
+            --password ${{ secrets.helm_password }}
+
+      - name: Package Helm chart
+        run: |
+          helm package ${{ inputs.chart_path }} --version ${{ env.CHART_VERSION }}
+          CHART_FILE="${{ inputs.chart_name }}-${{ env.CHART_VERSION }}.tgz"
+          echo "CHART_FILE=${CHART_FILE}" >> $GITHUB_ENV
+
+      - name: Push Helm chart to registry
+        run: |
+          helm push ${CHART_FILE} oci://${{ inputs.helm_registry }}
+
+      - name: Verify Helm chart
+        run: |
+          helm show chart oci://${{ inputs.helm_registry }}/${{ inputs.chart_name }}:${{ env.CHART_VERSION }}
+
