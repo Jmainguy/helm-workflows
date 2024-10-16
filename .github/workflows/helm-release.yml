@@ -65,5 +65,5 @@ jobs:
 
       - name: Verify Helm chart
         run: |
-          helm show chart oci://${{ inputs.helm_registry }}/${{ inputs.chart_name }}:${{ env.CHART_VERSION }}
+          helm show chart oci://${{ inputs.helm_registry }}/${{ inputs.chart_name }} --version ${{ env.CHART_VERSION }}
 
