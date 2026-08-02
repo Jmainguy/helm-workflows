@@ -47,11 +47,17 @@ jobs:
         env:
           chart_version: ${{ needs.release-please.outputs.major }}.${{ needs.release-please.outputs.minor }}.${{ needs.release-please.outputs.patch }}
 
-      - name: Login to Helm registry (if required)
+      - name: Login to Helm registry
+        env:
+          REGISTRY: ${{ inputs.helm_registry }}
+          HELM_USER: ${{ secrets.helm_username }}
+          HELM_PASS: ${{ secrets.helm_password }}
         run: |
-          helm registry login ${{ inputs.helm_registry }} \
-            --username ${{ secrets.helm_username }} \
-            --password ${{ secrets.helm_password }}
+          if [ -z "$HELM_USER" ] || [ -z "$HELM_PASS" ]; then
+            echo "::error::Registry credentials are empty. Set helm_username and helm_password secrets (e.g. zot.soh.re DOCKER_USERNAME / DOCKER_PASSWORD)."
+            exit 1
+          fi
+          echo "$HELM_PASS" | helm registry login "$REGISTRY" --username "$HELM_USER" --password-stdin
 
       - name: Package Helm chart
         run: |
