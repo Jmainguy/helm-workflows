@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/Jmainguy/helm-workflows/compare/v1.0.1...v1.0.2) (2026-08-02)
+
+
+### Bug Fixes
+
+* use password-stdin for helm registry login ([4d69666](https://github.com/Jmainguy/helm-workflows/commit/4d69666bb708295078a33b1d38539bac6c75f926))
+
 ## [1.0.1](https://github.com/Jmainguy/helm-workflows/compare/v1.0.0...v1.0.1) (2024-10-16)
 
 
