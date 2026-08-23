@@ -35,3 +35,5 @@ jobs:
 ```
 
 The chart must provide the stable required OCI annotations in `Chart.yaml`. The workflow supplies `created`, `revision`, and `version` at release time.
+
+After a successful publish, signature verification, and chart pull, the workflow runs checksum-verified `helm-docs` and commits the released README back to `main`. Set `generate_readme: false` only for charts that intentionally maintain documentation another way.
