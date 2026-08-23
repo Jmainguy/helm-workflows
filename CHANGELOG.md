@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/Jmainguy/helm-workflows/compare/v1.2.0...v1.3.0) (2026-08-23)
+
+
+### Features
+
+* **release:** delegate Notation signing to action ([b153cf7](https://github.com/Jmainguy/helm-workflows/commit/b153cf7228b72089a922638fc985a9ea3480325a))
+
 ## [1.2.0](https://github.com/Jmainguy/helm-workflows/compare/v1.1.0...v1.2.0) (2026-08-23)
 
 
