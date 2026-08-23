@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/Jmainguy/helm-workflows/compare/v1.1.0...v1.2.0) (2026-08-23)
+
+
+### Features
+
+* **release:** sign OCI charts with Notation ([bda9869](https://github.com/Jmainguy/helm-workflows/commit/bda98696faf3ac40ba3d9eddf4e646ea85277d35))
+
 ## [1.1.0](https://github.com/Jmainguy/helm-workflows/compare/v1.0.2...v1.1.0) (2026-08-23)
 
 
