@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/Jmainguy/helm-workflows/compare/v1.3.0...v1.4.0) (2026-08-23)
+
+
+### Features
+
+* **release:** regenerate chart README after publish ([7a2a6b8](https://github.com/Jmainguy/helm-workflows/commit/7a2a6b823e98652ce8c4449cdc4f37dc9bb326ec))
+
 ## [1.3.0](https://github.com/Jmainguy/helm-workflows/compare/v1.2.0...v1.3.0) (2026-08-23)
 
 
