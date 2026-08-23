@@ -73,11 +73,6 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v5.0.1
 
-      - name: Set up Notation
-        uses: Jmainguy/notation-action@v1
-        with:
-          version: 1.3.2
-
       - name: Add release annotations
         env:
           CREATED: ${{ github.event.head_commit.timestamp }}
@@ -110,37 +105,16 @@ jobs:
           echo "digest=${digest}" >> "${GITHUB_OUTPUT}"
 
       - name: Sign and verify chart digest
-        env:
-          NOTATION_PRIVATE_KEY: ${{ secrets.notation_private_key }}
-          NOTATION_CERTIFICATE_CHAIN: ${{ secrets.notation_certificate_chain }}
-          NOTATION_CA_CERTIFICATE: ${{ secrets.notation_ca_certificate }}
-          NOTATION_USERNAME: ${{ secrets.helm_username }}
-          NOTATION_PASSWORD: ${{ secrets.helm_password }}
-          NOTATION_KEY_NAME: ${{ inputs.notation_key_name }}
-          DIGEST: ${{ steps.push.outputs.digest }}
-        run: |
-          notation_config="${RUNNER_TEMP}/notation-config"
-          signing_dir="${RUNNER_TEMP}/notation-signing"
-          mkdir -p "${notation_config}/notation/truststore/x509/ca/release" "${signing_dir}"
-          chmod 700 "${notation_config}" "${signing_dir}"
-          key_file="${signing_dir}/signer.key"
-          certificate_file="${signing_dir}/certificate-chain.pem"
-          printf '%s' "${NOTATION_PRIVATE_KEY}" > "${key_file}"
-          printf '%s' "${NOTATION_CERTIFICATE_CHAIN}" > "${certificate_file}"
-          printf '%s' "${NOTATION_CA_CERTIFICATE}" > "${notation_config}/notation/truststore/x509/ca/release/ca.crt"
-          chmod 600 "${key_file}" "${certificate_file}"
-          jq -n \
-            --arg name "${NOTATION_KEY_NAME}" \
-            --arg key "${key_file}" \
-            --arg certificate "${certificate_file}" \
-            '{default:$name,keys:[{name:$name,keyPath:$key,certPath:$certificate}]}' \
-            > "${notation_config}/notation/signingkeys.json"
-          jq -n --arg scope "${REGISTRY}/${REGISTRY_NAMESPACE}/${CHART_NAME}" \
-            '{version:"1.0",trustPolicies:[{name:"release",registryScopes:[$scope],signatureVerification:{level:"strict"},trustStores:["ca:release"],trustedIdentities:["*"]}]}' \
-            > "${notation_config}/notation/trustpolicy.json"
-          artifact="${REGISTRY}/${REGISTRY_NAMESPACE}/${CHART_NAME}@${DIGEST}"
-          XDG_CONFIG_HOME="${notation_config}" notation sign --key "${NOTATION_KEY_NAME}" --signature-format jws "${artifact}"
-          XDG_CONFIG_HOME="${notation_config}" notation verify "${artifact}"
+        uses: Jmainguy/notation-action@v1
+        with:
+          version: 1.3.2
+          artifact: ${{ env.REGISTRY }}/${{ env.REGISTRY_NAMESPACE }}/${{ env.CHART_NAME }}@${{ steps.push.outputs.digest }}
+          key-name: ${{ inputs.notation_key_name }}
+          private-key: ${{ secrets.notation_private_key }}
+          certificate-chain: ${{ secrets.notation_certificate_chain }}
+          ca-certificate: ${{ secrets.notation_ca_certificate }}
+          username: ${{ secrets.helm_username }}
+          password: ${{ secrets.helm_password }}
 
       - name: Verify published chart
         run: |
