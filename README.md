@@ -1,36 +1,37 @@
-# golang-workflows
+# helm-workflows
 
-This repository is for managing github workflows for the purpose of automating the Continuous Integration of a Golang codebase.
+Reusable GitHub Actions workflows for linting and releasing Helm charts.
 
+The release workflow creates releases with Release Please, injects the required dynamic OCI annotations, publishes the chart to its owner-scoped Zot repository, and signs and verifies the immutable digest with Notation.
 
-## Usage
+## Signed release workflow
 
-Place a two files in your repos .github/workflows/ directory
-
-release-please.yaml
 ```yaml
-name: Call Reusable Golang Release-Please Workflow
+name: Release Helm Chart
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-  release-please:
-    uses: Jmainguy/golang-workflows/.github/workflows/golang-release.yml@v1
+  release:
+    uses: Jmainguy/helm-workflows/.github/workflows/helm-release.yml@v1
+    with:
+      chart_name: helm-webapp
+      chart_path: .
+      helm_registry: zot.soh.re
+      registry_namespace: jmainguy
     secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
+      release_token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+      helm_username: ${{ secrets.HELM_USERNAME }}
+      helm_password: ${{ secrets.HELM_PASSWORD }}
+      notation_private_key: ${{ secrets.NOTATION_PRIVATE_KEY }}
+      notation_certificate_chain: ${{ secrets.NOTATION_CERTIFICATE_CHAIN }}
+      notation_ca_certificate: ${{ secrets.NOTATION_CA_CERTIFICATE }}
 ```
 
-push.yml
-```yaml
-name: Call Reusable Golang CI Workflow
-
-on:
-  push:
-
-jobs:
-  golang-ci:
-    uses: Jmainguy/golang-workflows/.github/workflows/golang-ci.yml@v1
-```
+The chart must provide the stable required OCI annotations in `Chart.yaml`. The workflow supplies `created`, `revision`, and `version` at release time.
